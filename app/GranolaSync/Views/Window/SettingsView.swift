@@ -1,0 +1,95 @@
+import SwiftUI
+
+struct SettingsView: View {
+    @EnvironmentObject var appState: AppState
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 20) {
+                Text("Settings")
+                    .font(.largeTitle.bold())
+                    .padding(.bottom, 4)
+
+                // Google Drive path
+                GroupBox("Google Drive") {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Export destination folder:")
+                            .font(.callout)
+                        HStack {
+                            TextField("Google Drive path", text: $appState.config.drivePath)
+                                .textFieldStyle(.roundedBorder)
+                            Button("Browse...") {
+                                let panel = NSOpenPanel()
+                                panel.canChooseFiles = false
+                                panel.canChooseDirectories = true
+                                panel.allowsMultipleSelection = false
+                                if panel.runModal() == .OK, let url = panel.url {
+                                    appState.config.drivePath = url.path
+                                    appState.saveConfig()
+                                    appState.refresh()
+                                }
+                            }
+                        }
+                        StatusRow(label: "Status", status: appState.driveStatus)
+                    }
+                    .padding(4)
+                }
+
+                // Schedule
+                GroupBox("Sync Schedule") {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("How often to automatically export new meetings:")
+                            .font(.callout)
+                        Picker("Schedule", selection: Binding(
+                            get: { appState.config.schedule },
+                            set: { appState.updateSchedule($0) }
+                        )) {
+                            ForEach(SyncSchedule.allCases, id: \.self) { option in
+                                Text(option.displayName).tag(option)
+                            }
+                        }
+                        .pickerStyle(.segmented)
+                        .labelsHidden()
+                    }
+                    .padding(4)
+                }
+
+                // Granola paths
+                GroupBox("Granola") {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Cache path:")
+                            .font(.callout)
+                        TextField("Cache path", text: $appState.config.granolaCachePath)
+                            .textFieldStyle(.roundedBorder)
+
+                        Text("Auth path:")
+                            .font(.callout)
+                        TextField("Auth path", text: $appState.config.granolaAuthPath)
+                            .textFieldStyle(.roundedBorder)
+
+                        StatusRow(label: "Granola", status: appState.granolaStatus)
+                    }
+                    .padding(4)
+                }
+
+                // Notifications
+                GroupBox("Notifications") {
+                    Toggle("Show notifications after export", isOn: $appState.config.notificationsEnabled)
+                        .padding(4)
+                }
+
+                // Save button
+                HStack {
+                    Spacer()
+                    Button("Save") {
+                        appState.saveConfig()
+                        appState.refresh()
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(.large)
+                }
+            }
+            .padding(24)
+        }
+    }
+}

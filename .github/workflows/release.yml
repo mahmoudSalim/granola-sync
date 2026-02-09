@@ -1,0 +1,32 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+jobs:
+  build-and-release:
+    runs-on: macos-14
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Build Swift app
+        run: make app
+
+      - name: Bundle Python
+        run: bash scripts/bundle-python.sh
+
+      - name: Create DMG
+        run: bash scripts/create-dmg.sh
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: build/GranolaSync-*.dmg
+          generate_release_notes: true
