@@ -2,6 +2,8 @@ import SwiftUI
 
 struct SettingsView: View {
     @EnvironmentObject var appState: AppState
+    @State private var launchdInstalled: Bool = false
+    @State private var launchdLoaded: Bool = false
 
     var body: some View {
         ScrollView {
@@ -35,6 +37,22 @@ struct SettingsView: View {
                     .padding(4)
                 }
 
+                // Export format
+                GroupBox("Export Format") {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("File format for exported meetings:")
+                            .font(.callout)
+                        Picker("Format", selection: $appState.config.exportFormat) {
+                            Text(".docx (Word)").tag("docx")
+                            Text(".md (Markdown)").tag("md")
+                            Text(".txt (Plain text)").tag("txt")
+                        }
+                        .pickerStyle(.segmented)
+                        .labelsHidden()
+                    }
+                    .padding(4)
+                }
+
                 // Schedule
                 GroupBox("Sync Schedule") {
                     VStack(alignment: .leading, spacing: 8) {
@@ -50,6 +68,22 @@ struct SettingsView: View {
                         }
                         .pickerStyle(.segmented)
                         .labelsHidden()
+
+                        // Launchd toggle
+                        HStack {
+                            Toggle("Scheduled sync active", isOn: Binding(
+                                get: { launchdLoaded },
+                                set: { newValue in
+                                    toggleLaunchd(enable: newValue)
+                                }
+                            ))
+                            Spacer()
+                            if launchdInstalled {
+                                Text(launchdLoaded ? "Running" : "Stopped")
+                                    .font(.caption)
+                                    .foregroundStyle(launchdLoaded ? .green : .orange)
+                            }
+                        }
                     }
                     .padding(4)
                 }
@@ -90,6 +124,22 @@ struct SettingsView: View {
                 }
             }
             .padding(24)
+        }
+        .onAppear { checkLaunchd() }
+    }
+
+    private func checkLaunchd() {
+        let service = LaunchdService.shared
+        launchdInstalled = service.isInstalled()
+        launchdLoaded = service.isLoaded()
+    }
+
+    private func toggleLaunchd(enable: Bool) {
+        launchdLoaded = enable
+        let bridge = PythonBridge()
+        Task {
+            _ = try? await bridge.launchd(action: enable ? "install" : "uninstall")
+            await MainActor.run { checkLaunchd() }
         }
     }
 }

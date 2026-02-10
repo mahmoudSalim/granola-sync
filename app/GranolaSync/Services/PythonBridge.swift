@@ -125,6 +125,49 @@ actor PythonBridge {
         return String(data: data, encoding: .utf8) ?? ""
     }
 
+    func exportSelected(ids: [String], force: Bool = false) async throws -> ExportResult {
+        var args = ["export", "--json", "--ids", ids.joined(separator: ",")]
+        if force { args.append("--force") }
+        let data = try await run(args)
+        do {
+            return try JSONDecoder().decode(ExportResult.self, from: data)
+        } catch {
+            throw BridgeError.decodingFailed(String(data: data, encoding: .utf8) ?? "")
+        }
+    }
+
+    func listMeetings() async throws -> [MeetingSummary] {
+        let data = try await run(["list", "--json"])
+        do {
+            return try JSONDecoder().decode([MeetingSummary].self, from: data)
+        } catch {
+            throw BridgeError.decodingFailed(String(data: data, encoding: .utf8) ?? "")
+        }
+    }
+
+    func showMeeting(id: String) async throws -> MeetingDetail {
+        let data = try await run(["show", id, "--json"])
+        do {
+            return try JSONDecoder().decode(MeetingDetail.self, from: data)
+        } catch {
+            throw BridgeError.decodingFailed(String(data: data, encoding: .utf8) ?? "")
+        }
+    }
+
+    func stats() async throws -> SyncStats {
+        let data = try await run(["stats", "--json"])
+        do {
+            return try JSONDecoder().decode(SyncStats.self, from: data)
+        } catch {
+            throw BridgeError.decodingFailed(String(data: data, encoding: .utf8) ?? "")
+        }
+    }
+
+    func launchd(action: String) async throws -> String {
+        let data = try await run(["launchd", action])
+        return String(data: data, encoding: .utf8) ?? ""
+    }
+
     var isAvailable: Bool {
         findBinary().0 != nil
     }

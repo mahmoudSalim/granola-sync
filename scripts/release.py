@@ -174,17 +174,21 @@ def step_git_and_release(d: str, version: str):
     info("Creating release...")
     notes = (
         f"## Granola Sync v{version}\n\n"
-        "Export Granola meetings to Google Drive as .docx files.\n\n"
+        "Export Granola meetings to Google Drive as .docx, .md, or .txt files.\n\n"
         "### Install\n"
         "```\n"
         "brew tap mahmoudSalim/granola\n"
         "brew install --cask granola-sync\n"
         "```\n\n"
         "### Features\n"
+        "- Multi-format export: .docx, Markdown, plain text\n"
+        "- Meeting browser with search, sort, and bulk export\n"
+        "- Stats dashboard with charts and activity heatmap\n"
+        "- Inline meeting preview with transcript, notes, and summary\n"
+        "- Log viewer for export history\n"
         "- Menu bar app with popover dashboard\n"
         "- Scheduled sync via launchd\n"
         "- Setup wizard for first-time configuration\n"
-        "- Transcript + summary + notes in each .docx\n"
     )
     r = subprocess.run(
         ["gh", "release", "create", f"v{version}", "--title", f"Granola Sync v{version}", "--notes", notes],

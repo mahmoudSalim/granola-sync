@@ -12,6 +12,12 @@ class AppState: ObservableObject {
     @Published var exportOutput = ""
     @Published var needsSetup: Bool
 
+    // v1.1 additions
+    @Published var meetings: [MeetingSummary] = []
+    @Published var syncStats: SyncStats?
+    @Published var isLoadingMeetings = false
+    @Published var isLoadingStats = false
+
     private let bridge = PythonBridge()
     private let configService = ConfigService.shared
     private let statusChecker = StatusChecker.shared
@@ -61,6 +67,53 @@ class AppState: ObservableObject {
             }
             self.isExporting = false
             self.refresh()
+            self.loadMeetings()
+        }
+    }
+
+    func exportSelected(ids: [String], force: Bool = false) {
+        guard !isExporting else { return }
+        isExporting = true
+        exportOutput = ""
+
+        Task {
+            do {
+                let result = try await bridge.exportSelected(ids: ids, force: force)
+                self.exportOutput = result.message
+            } catch {
+                self.exportOutput = "Error: \(error.localizedDescription)"
+            }
+            self.isExporting = false
+            self.refresh()
+            self.loadMeetings()
+        }
+    }
+
+    func loadMeetings() {
+        guard !isLoadingMeetings else { return }
+        isLoadingMeetings = true
+
+        Task {
+            do {
+                self.meetings = try await bridge.listMeetings()
+            } catch {
+                self.meetings = []
+            }
+            self.isLoadingMeetings = false
+        }
+    }
+
+    func loadStats() {
+        guard !isLoadingStats else { return }
+        isLoadingStats = true
+
+        Task {
+            do {
+                self.syncStats = try await bridge.stats()
+            } catch {
+                self.syncStats = nil
+            }
+            self.isLoadingStats = false
         }
     }
 

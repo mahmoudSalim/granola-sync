@@ -1,10 +1,10 @@
 cask "granola-sync" do
-  version "1.0.0"
+  version "1.1.0"
   sha256 "4e1e0014c72f42267bba137f45a441ddf7846ad1a35800cf3b16c75da9832a70"
 
   url "https://github.com/mahmoudSalim/granola-sync/releases/download/v#{version}/GranolaSync-#{version}.dmg"
   name "Granola Sync"
-  desc "Export Granola meetings to Google Drive as .docx files"
+  desc "Export Granola meetings to Google Drive as .docx, .md, or .txt files"
   homepage "https://github.com/mahmoudSalim/granola-sync"
 
   app "Granola Sync.app"

@@ -14,8 +14,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
 
         if let button = statusItem.button {
-            button.image = NSImage(systemSymbolName: "arrow.triangle.2.circlepath.circle.fill",
-                                    accessibilityDescription: "Granola Sync")
+            if let icon = NSImage(named: "AppIcon") ?? NSApp.applicationIconImage {
+                let size = NSSize(width: 18, height: 18)
+                let resized = NSImage(size: size, flipped: false) { rect in
+                    icon.draw(in: rect)
+                    return true
+                }
+                resized.isTemplate = false
+                button.image = resized
+            }
             button.action = #selector(togglePopover)
             button.target = self
         }

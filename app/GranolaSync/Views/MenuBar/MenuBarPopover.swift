@@ -7,13 +7,13 @@ struct MenuBarPopover: View {
         VStack(spacing: 0) {
             // Header
             HStack {
-                Image(systemName: "arrow.triangle.2.circlepath.circle.fill")
-                    .font(.title2)
-                    .foregroundStyle(.blue)
+                Image(nsImage: NSApp.applicationIconImage)
+                    .resizable()
+                    .frame(width: 24, height: 24)
                 Text("Granola Sync")
                     .font(.headline)
                 Spacer()
-                Text("v\(appState.config.version > 0 ? "0.1.0" : "0.1.0")")
+                Text("v1.1.0")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
             }
