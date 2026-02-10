@@ -11,6 +11,8 @@ from .auth import get_access_token
 from .api import fetch_transcript
 from .cache import load_cache
 from .docx_builder import create_meeting_docx
+from .markdown_builder import create_meeting_md
+from .text_builder import create_meeting_txt
 from .manifest import load_manifest, save_manifest, add_entry
 from .notifications import notify
 from .utils import safe_filename, unique_filename
@@ -38,7 +40,7 @@ class ExportResult:
         }
 
 
-def run_export(cfg: dict | None = None) -> ExportResult:
+def run_export(cfg: dict | None = None, doc_ids: list[str] | None = None, force: bool = False) -> ExportResult:
     cfg = cfg or config.load_config()
     result = ExportResult()
 
@@ -85,8 +87,12 @@ def run_export(cfg: dict | None = None) -> ExportResult:
 
     manifest = load_manifest(config.expand(cfg.get("manifest_path", "")))
 
-    for doc_id, doc in cache.documents.items():
-        if doc_id in manifest:
+    docs_to_export = cache.documents.items()
+    if doc_ids:
+        docs_to_export = [(did, cache.documents[did]) for did in doc_ids if did in cache.documents]
+
+    for doc_id, doc in docs_to_export:
+        if doc_id in manifest and not force:
             result.skipped += 1
             continue
 
@@ -99,8 +105,10 @@ def run_export(cfg: dict | None = None) -> ExportResult:
         except (ValueError, AttributeError):
             date_prefix = "unknown-date"
 
+        export_format = cfg.get("export_format", "docx")
+        ext = {"docx": ".docx", "md": ".md", "txt": ".txt"}.get(export_format, ".docx")
         base_name = f"{date_prefix} - {safe_filename(title)}"
-        filename = unique_filename(drive_path, base_name, ".docx")
+        filename = unique_filename(drive_path, base_name, ext)
 
         # Summary from panels
         summary_html = ""
@@ -141,16 +149,22 @@ def run_export(cfg: dict | None = None) -> ExportResult:
             continue
 
         filepath = os.path.join(drive_path, filename)
+        builder_args = dict(
+            filepath=filepath,
+            title=title,
+            date_str=created_at,
+            attendees=attendees,
+            summary_html=summary_html,
+            transcript_chunks=transcript_chunks,
+            notes_markdown=notes_md,
+        )
         try:
-            create_meeting_docx(
-                filepath=filepath,
-                title=title,
-                date_str=created_at,
-                attendees=attendees,
-                summary_html=summary_html,
-                transcript_chunks=transcript_chunks,
-                notes_markdown=notes_md,
-            )
+            if export_format == "md":
+                create_meeting_md(**builder_args)
+            elif export_format == "txt":
+                create_meeting_txt(**builder_args)
+            else:
+                create_meeting_docx(**builder_args)
             add_entry(manifest, doc_id, filename)
             result.exported += 1
             result.files.append(filename)

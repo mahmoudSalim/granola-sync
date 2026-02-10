@@ -1,14 +1,20 @@
+<p align="center">
+  <img src="icon.png" width="128" height="128" alt="Granola Sync">
+</p>
+
 # Granola Sync
 
-Export your [Granola](https://granola.ai) meetings to Google Drive as beautifully formatted `.docx` files.
+Export your [Granola](https://granola.ai) meetings to Google Drive as `.docx`, `.md`, or `.txt` files.
 
 **Features:**
 - Reads meetings from Granola's local cache
 - Falls back to the Granola API for transcripts not in cache
-- Generates styled `.docx` files with summary, notes, and full transcript
+- Generates styled `.docx`, Markdown, or plain text exports with summary, notes, and full transcript
+- Meeting browser with search, sort, and bulk export
+- Dashboard with sync stats, charts, and activity heatmap
 - Tracks exports to avoid duplicates
 - macOS menu bar app with status display and one-click export
-- Full windowed app with dashboard, export history, and settings
+- Full windowed app with dashboard, meeting browser, export history, log viewer, and settings
 - First-run setup wizard with Google Drive auto-detection
 - Scheduled automatic exports via launchd
 
@@ -57,6 +63,13 @@ On first launch, a setup wizard guides you through:
 ```bash
 granola-sync export              # Export new meetings
 granola-sync export --json       # JSON output (for scripting)
+granola-sync export --ids ID1,ID2 --force  # Export specific meetings
+granola-sync list                # List all meetings in cache
+granola-sync list --json         # JSON list (for scripting)
+granola-sync show <doc_id>       # Show meeting details
+granola-sync show <doc_id> --json
+granola-sync stats               # Show sync statistics
+granola-sync stats --json        # JSON stats
 granola-sync status              # Show sync status
 granola-sync status --json       # JSON status
 granola-sync config show         # Show current config

@@ -5,18 +5,18 @@ struct AboutView: View {
         VStack(spacing: 20) {
             Spacer()
 
-            Image(systemName: "arrow.triangle.2.circlepath.circle.fill")
-                .font(.system(size: 64))
-                .foregroundStyle(.blue)
+            Image(nsImage: NSApp.applicationIconImage)
+                .resizable()
+                .frame(width: 128, height: 128)
 
             Text("Granola Sync")
                 .font(.largeTitle.bold())
 
-            Text("v0.1.0")
+            Text("v1.1.0")
                 .font(.title3)
                 .foregroundStyle(.secondary)
 
-            Text("Export your Granola meetings to Google Drive as beautifully formatted .docx files.")
+            Text("Export your Granola meetings to Google Drive as .docx, .md, or .txt files.")
                 .font(.body)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)

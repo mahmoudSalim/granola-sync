@@ -2,7 +2,9 @@ import SwiftUI
 
 enum SidebarItem: String, CaseIterable, Identifiable {
     case dashboard = "Dashboard"
+    case meetings = "Meetings"
     case history = "Export History"
+    case log = "Log"
     case settings = "Settings"
     case about = "About"
 
@@ -11,7 +13,9 @@ enum SidebarItem: String, CaseIterable, Identifiable {
     var icon: String {
         switch self {
         case .dashboard: return "gauge.with.dots.needle.bottom.50percent"
+        case .meetings: return "person.3"
         case .history: return "clock.arrow.circlepath"
+        case .log: return "doc.plaintext"
         case .settings: return "gearshape"
         case .about: return "info.circle"
         }
@@ -33,8 +37,12 @@ struct MainWindow: View {
             switch selection {
             case .dashboard:
                 DashboardView()
+            case .meetings:
+                MeetingBrowserView()
             case .history:
                 ExportHistoryView()
+            case .log:
+                LogViewerView()
             case .settings:
                 SettingsView()
             case .about:
