@@ -12,7 +12,7 @@ struct AboutView: View {
             Text("Granola Sync")
                 .font(.largeTitle.bold())
 
-            Text("v1.1.0")
+            Text("v1.1.1")
                 .font(.title3)
                 .foregroundStyle(.secondary)
 

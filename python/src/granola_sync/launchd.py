@@ -11,10 +11,16 @@ PLIST_PATH = Path(os.path.expanduser(f"~/Library/LaunchAgents/{LABEL}.plist"))
 
 
 def _find_binary() -> str:
-    """Find the granola-sync binary."""
+    """Find the granola-sync binary, preferring the bundled app binary."""
+    # Bundled inside the .app (brew install --cask users)
+    bundled = "/Applications/Granola Sync.app/Contents/Resources/python-env/bin/granola-sync"
+    if os.path.isfile(bundled) and os.access(bundled, os.X_OK):
+        return bundled
+    # Dev / pip install locations
     candidates = [
         os.path.expanduser("~/.local/bin/granola-sync"),
         "/usr/local/bin/granola-sync",
+        "/opt/homebrew/bin/granola-sync",
     ]
     for c in candidates:
         if os.path.isfile(c) and os.access(c, os.X_OK):
@@ -23,7 +29,7 @@ def _find_binary() -> str:
     result = subprocess.run(["which", "granola-sync"], capture_output=True, text=True)
     if result.returncode == 0:
         return result.stdout.strip()
-    raise FileNotFoundError("granola-sync binary not found. Install with: uv pip install granola-sync")
+    raise FileNotFoundError("granola-sync binary not found. Install with: brew install --cask granola-sync")
 
 
 def generate_plist(interval: int = 1209600, log_path: str | None = None) -> dict:

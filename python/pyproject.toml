@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "granola-sync"
-version = "1.1.0"
+version = "1.1.1"
 description = "Export Granola meetings to Google Drive as .docx, .md, or .txt files"
 readme = {text = "Export Granola meetings to Google Drive as .docx, .md, or .txt files", content-type = "text/plain"}
 license = "MIT"

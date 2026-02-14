@@ -250,7 +250,7 @@ def cmd_launchd(args):
 
     if args.action == "install":
         cfg = config.load_config()
-        interval = cfg.get("schedule_interval", 1209600)
+        interval = args.interval if args.interval else cfg.get("schedule_interval", 1209600)
         log_path = config.expand(cfg.get("log_path", ""))
         msg = launchd.install(interval, log_path or None)
         print(f"  {msg}")
@@ -320,6 +320,7 @@ def main():
     # launchd
     p_launchd = subparsers.add_parser("launchd", help="Manage scheduled exports")
     p_launchd.add_argument("action", choices=["install", "uninstall", "status"])
+    p_launchd.add_argument("--interval", type=int, help="Schedule interval in seconds (default: from config)")
     p_launchd.add_argument("--json", action="store_true", dest="json")
 
     # version

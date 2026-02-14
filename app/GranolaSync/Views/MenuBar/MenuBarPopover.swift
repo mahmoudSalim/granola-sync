@@ -13,7 +13,7 @@ struct MenuBarPopover: View {
                 Text("Granola Sync")
                     .font(.headline)
                 Spacer()
-                Text("v1.1.0")
+                Text("v1.1.1")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
             }
