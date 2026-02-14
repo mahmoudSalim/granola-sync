@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct AboutView: View {
+    @EnvironmentObject var appState: AppState
+
     var body: some View {
         VStack(spacing: 20) {
             Spacer()
@@ -12,7 +14,7 @@ struct AboutView: View {
             Text("Granola Sync")
                 .font(.largeTitle.bold())
 
-            Text("v1.1.1")
+            Text("v1.1.2")
                 .font(.title3)
                 .foregroundStyle(.secondary)
 
@@ -32,6 +34,32 @@ struct AboutView: View {
                      destination: URL(string: "https://github.com/mahmoudsalim/granola-sync/issues")!)
             }
             .font(.callout)
+
+            if let version = appState.updateAvailable {
+                Button {
+                    appState.installUpdate()
+                } label: {
+                    HStack(spacing: 6) {
+                        if appState.isUpdating {
+                            ProgressView()
+                                .controlSize(.small)
+                        }
+                        Text(appState.isUpdating ? "Updating..." : "Update to v\(version)")
+                    }
+                }
+                .buttonStyle(.borderedProminent)
+                .disabled(appState.isUpdating)
+            } else {
+                Button("Check for Updates") {
+                    appState.checkForUpdates()
+                }
+            }
+
+            if !appState.updateMessage.isEmpty {
+                Text(appState.updateMessage)
+                    .font(.caption)
+                    .foregroundStyle(appState.updateAvailable == nil ? .green : .secondary)
+            }
 
             Text("MIT License")
                 .font(.caption)

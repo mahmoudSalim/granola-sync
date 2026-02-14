@@ -11,6 +11,39 @@ struct DashboardView: View {
                     .font(.largeTitle.bold())
                     .padding(.bottom, 4)
 
+                // Update banner
+                if let version = appState.updateAvailable {
+                    Button {
+                        appState.installUpdate()
+                    } label: {
+                        HStack {
+                            if appState.isUpdating {
+                                ProgressView()
+                                    .controlSize(.small)
+                                    .tint(.white)
+                            } else {
+                                Image(systemName: "arrow.up.circle.fill")
+                                    .foregroundStyle(.white)
+                            }
+                            Text(appState.isUpdating ? "Updating..." : "v\(version) available — click to update")
+                                .font(.callout.bold())
+                                .foregroundStyle(.white)
+                            Spacer()
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 12)
+                        .background(.blue.gradient, in: RoundedRectangle(cornerRadius: 10))
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(appState.isUpdating)
+                }
+
+                if !appState.updateMessage.isEmpty && appState.updateAvailable == nil {
+                    Text(appState.updateMessage)
+                        .font(.callout)
+                        .foregroundStyle(.green)
+                }
+
                 // Connection status
                 HStack(spacing: 16) {
                     StatusCard(

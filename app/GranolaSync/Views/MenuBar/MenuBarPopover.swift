@@ -13,7 +13,7 @@ struct MenuBarPopover: View {
                 Text("Granola Sync")
                     .font(.headline)
                 Spacer()
-                Text("v1.1.1")
+                Text("v1.1.2")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
             }
@@ -22,6 +22,44 @@ struct MenuBarPopover: View {
             .padding(.bottom, 10)
 
             Divider()
+
+            // Update banner
+            if let version = appState.updateAvailable {
+                Button {
+                    appState.installUpdate()
+                } label: {
+                    HStack {
+                        if appState.isUpdating {
+                            ProgressView()
+                                .controlSize(.small)
+                                .tint(.white)
+                        } else {
+                            Image(systemName: "arrow.up.circle.fill")
+                                .foregroundStyle(.white)
+                        }
+                        Text(appState.isUpdating ? "Updating..." : "v\(version) available — tap to update")
+                            .font(.caption.bold())
+                            .foregroundStyle(.white)
+                        Spacer()
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .background(.blue.gradient, in: RoundedRectangle(cornerRadius: 8))
+                }
+                .buttonStyle(.plain)
+                .disabled(appState.isUpdating)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 6)
+            }
+
+            // Update message (after update completes or "up to date")
+            if !appState.updateMessage.isEmpty && appState.updateAvailable == nil {
+                Text(appState.updateMessage)
+                    .font(.caption)
+                    .foregroundStyle(.green)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 4)
+            }
 
             // Status rows
             VStack(spacing: 8) {
@@ -114,6 +152,9 @@ struct MenuBarPopover: View {
                 }
                 BottomButton(title: "Refresh", icon: "arrow.clockwise", shortcut: "R") {
                     appState.refresh()
+                }
+                BottomButton(title: "Check for Updates", icon: "arrow.up.circle") {
+                    appState.checkForUpdates()
                 }
 
                 Divider()

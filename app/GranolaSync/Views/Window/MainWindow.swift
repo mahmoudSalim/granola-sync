@@ -53,5 +53,15 @@ struct MainWindow: View {
         .sheet(isPresented: $appState.needsSetup) {
             SetupWizardView()
         }
+        .alert(appState.updateAlertTitle, isPresented: $appState.showUpdateAlert) {
+            if appState.updateAvailable != nil {
+                Button("Update Now") { appState.installUpdate() }
+                Button("Later", role: .cancel) { }
+            } else {
+                Button("OK", role: .cancel) { }
+            }
+        } message: {
+            Text(appState.updateAlertMessage)
+        }
     }
 }

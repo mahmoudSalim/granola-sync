@@ -75,7 +75,7 @@ def cap(cmd: str, cwd: str | None = None, check: bool = True) -> str:
 def update_formula(formula_path: str, sha: str, version: str | None = None):
     with open(formula_path) as f:
         content = f.read()
-    content = re.sub(r'sha256 "[a-f0-9]+"', f'sha256 "{sha}"', content)
+    content = re.sub(r'sha256 "[^"]+"', f'sha256 "{sha}"', content)
     if version:
         content = re.sub(r'version "[^"]+"', f'version "{version}"', content)
     with open(formula_path, "w") as f:

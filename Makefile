@@ -26,8 +26,8 @@ app: $(SWIFT_FILES)
 	@/usr/libexec/PlistBuddy -c "Set :CFBundleName $(APP_NAME)" "$(BUILD_DIR)/$(BUNDLE)/Contents/Info.plist"
 	@/usr/libexec/PlistBuddy -c "Add :CFBundleIdentifier string com.granola-sync.app" "$(BUILD_DIR)/$(BUNDLE)/Contents/Info.plist" 2>/dev/null || true
 	@/usr/libexec/PlistBuddy -c "Add :CFBundleExecutable string $(APP_NAME)" "$(BUILD_DIR)/$(BUNDLE)/Contents/Info.plist" 2>/dev/null || true
-	@/usr/libexec/PlistBuddy -c "Add :CFBundleVersion string 1.1.1" "$(BUILD_DIR)/$(BUNDLE)/Contents/Info.plist" 2>/dev/null || true
-	@/usr/libexec/PlistBuddy -c "Add :CFBundleShortVersionString string 1.1.1" "$(BUILD_DIR)/$(BUNDLE)/Contents/Info.plist" 2>/dev/null || true
+	@/usr/libexec/PlistBuddy -c "Add :CFBundleVersion string 1.1.2" "$(BUILD_DIR)/$(BUNDLE)/Contents/Info.plist" 2>/dev/null || true
+	@/usr/libexec/PlistBuddy -c "Add :CFBundleShortVersionString string 1.1.2" "$(BUILD_DIR)/$(BUNDLE)/Contents/Info.plist" 2>/dev/null || true
 	@/usr/libexec/PlistBuddy -c "Add :CFBundleDisplayName string '$(DISPLAY_NAME)'" "$(BUILD_DIR)/$(BUNDLE)/Contents/Info.plist" 2>/dev/null || true
 	@/usr/libexec/PlistBuddy -c "Add :CFBundleIconFile string AppIcon" "$(BUILD_DIR)/$(BUNDLE)/Contents/Info.plist" 2>/dev/null || true
 	@/usr/libexec/PlistBuddy -c "Add :CFBundlePackageType string APPL" "$(BUILD_DIR)/$(BUNDLE)/Contents/Info.plist" 2>/dev/null || true
