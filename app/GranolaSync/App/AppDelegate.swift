@@ -1,15 +1,15 @@
 import SwiftUI
 import AppKit
 
+@MainActor
 class AppDelegate: NSObject, NSApplicationDelegate {
     var statusItem: NSStatusItem!
     var popover: NSPopover!
     var globalMonitor: Any?
     var localMonitor: Any?
-    var appState: AppState!
+    let appState = AppState()
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        appState = AppState()
 
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
 

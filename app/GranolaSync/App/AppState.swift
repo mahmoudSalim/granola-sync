@@ -18,6 +18,10 @@ class AppState: ObservableObject {
     @Published var isLoadingMeetings = false
     @Published var isLoadingStats = false
 
+    // Launchd scheduler
+    @Published var launchdInstalled = false
+    @Published var launchdLoaded = false
+
     // Update check
     @Published var updateAvailable: String? = nil
     @Published var updateURL: URL? = nil
@@ -38,6 +42,7 @@ class AppState: ObservableObject {
         self.needsSetup = !configService.configExists
         refresh()
         checkForUpdates()
+        ensureLaunchd()
     }
 
     func refresh() {
@@ -139,6 +144,27 @@ class AppState: ObservableObject {
     func updateSchedule(_ schedule: SyncSchedule) {
         config.schedule = schedule
         saveConfig()
+        ensureLaunchd()
+    }
+
+    func checkLaunchd() {
+        let service = LaunchdService.shared
+        launchdInstalled = service.isInstalled()
+        launchdLoaded = service.isLoaded()
+    }
+
+    func ensureLaunchd() {
+        Task {
+            _ = try? await bridge.launchd(action: "install")
+            self.checkLaunchd()
+        }
+    }
+
+    func toggleLaunchd(enable: Bool) {
+        Task {
+            _ = try? await bridge.launchd(action: enable ? "install" : "uninstall")
+            self.checkLaunchd()
+        }
     }
 
     func openDriveFolder() {

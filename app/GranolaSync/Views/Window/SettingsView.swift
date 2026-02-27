@@ -2,8 +2,6 @@ import SwiftUI
 
 struct SettingsView: View {
     @EnvironmentObject var appState: AppState
-    @State private var launchdInstalled: Bool = false
-    @State private var launchdLoaded: Bool = false
 
     var body: some View {
         ScrollView {
@@ -72,16 +70,16 @@ struct SettingsView: View {
                         // Launchd toggle
                         HStack {
                             Toggle("Scheduled sync active", isOn: Binding(
-                                get: { launchdLoaded },
+                                get: { appState.launchdLoaded },
                                 set: { newValue in
-                                    toggleLaunchd(enable: newValue)
+                                    appState.toggleLaunchd(enable: newValue)
                                 }
                             ))
                             Spacer()
-                            if launchdInstalled {
-                                Text(launchdLoaded ? "Running" : "Stopped")
+                            if appState.launchdInstalled {
+                                Text(appState.launchdLoaded ? "Running" : "Stopped")
                                     .font(.caption)
-                                    .foregroundStyle(launchdLoaded ? .green : .orange)
+                                    .foregroundStyle(appState.launchdLoaded ? .green : .orange)
                             }
                         }
                     }
@@ -125,21 +123,6 @@ struct SettingsView: View {
             }
             .padding(24)
         }
-        .onAppear { checkLaunchd() }
-    }
-
-    private func checkLaunchd() {
-        let service = LaunchdService.shared
-        launchdInstalled = service.isInstalled()
-        launchdLoaded = service.isLoaded()
-    }
-
-    private func toggleLaunchd(enable: Bool) {
-        launchdLoaded = enable
-        let bridge = PythonBridge()
-        Task {
-            _ = try? await bridge.launchd(action: enable ? "install" : "uninstall")
-            await MainActor.run { checkLaunchd() }
-        }
+        .onAppear { appState.checkLaunchd() }
     }
 }

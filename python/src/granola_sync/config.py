@@ -11,7 +11,7 @@ CONFIG_PATH = CONFIG_DIR / "config.json"
 DEFAULTS = {
     "version": 1,
     "drive_path": "",
-    "granola_cache_path": "~/Library/Application Support/Granola/cache-v3.json",
+    "granola_cache_path": "~/Library/Application Support/Granola/cache-v4.json",
     "granola_auth_path": "~/Library/Application Support/Granola/supabase.json",
     "manifest_path": str(CONFIG_DIR / "manifest.json"),
     "schedule_interval": 1209600,
@@ -77,6 +77,14 @@ def validate_config(config: dict) -> tuple[list[str], list[str]]:
 
     cache_path = expand(config.get("granola_cache_path", ""))
     if not os.path.isfile(cache_path):
-        errors.append(f"Granola cache not found: {cache_path}")
+        # Check if any cache-v*.json exists (Granola may have upgraded)
+        import glob
+        granola_dir = os.path.expanduser("~/Library/Application Support/Granola")
+        alt = glob.glob(os.path.join(granola_dir, "cache-v*.json"))
+        if alt:
+            warnings.append(f"Configured cache {os.path.basename(cache_path)} not found, "
+                            f"but {os.path.basename(alt[-1])} exists — will auto-detect")
+        else:
+            errors.append(f"Granola cache not found: {cache_path}")
 
     return errors, warnings

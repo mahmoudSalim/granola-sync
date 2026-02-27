@@ -8,23 +8,23 @@ struct GranolaSyncApp: App {
         // Main window
         WindowGroup("Granola Sync") {
             MainWindow()
-                .environmentObject(delegate.appState ?? AppState())
+                .environmentObject(delegate.appState)
         }
         .defaultSize(width: 700, height: 500)
         .commands {
             CommandGroup(after: .appInfo) {
                 Button("Check for Updates...") {
-                    delegate.appState?.checkForUpdatesInteractive()
+                    delegate.appState.checkForUpdatesInteractive()
                 }
                 .keyboardShortcut("U", modifiers: [.command])
-                .disabled(delegate.appState?.isCheckingForUpdates == true)
+                .disabled(delegate.appState.isCheckingForUpdates)
             }
         }
 
         // Settings window (Cmd+, or app menu > Settings)
         Settings {
             SettingsView()
-                .environmentObject(delegate.appState ?? AppState())
+                .environmentObject(delegate.appState)
                 .frame(minWidth: 500, minHeight: 400)
         }
     }

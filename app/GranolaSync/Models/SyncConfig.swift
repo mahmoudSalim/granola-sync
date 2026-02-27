@@ -3,7 +3,7 @@ import Foundation
 struct SyncConfig: Codable {
     var version: Int = 1
     var drivePath: String = ""
-    var granolaCachePath: String = "~/Library/Application Support/Granola/cache-v3.json"
+    var granolaCachePath: String = "~/Library/Application Support/Granola/cache-v4.json"
     var granolaAuthPath: String = "~/Library/Application Support/Granola/supabase.json"
     var manifestPath: String = "~/Library/Application Support/GranolaSync/manifest.json"
     var scheduleInterval: Int = 1_209_600

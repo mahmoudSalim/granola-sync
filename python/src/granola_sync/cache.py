@@ -1,12 +1,16 @@
-"""Parse Granola's cache-v3.json safely."""
+"""Parse Granola's cache file safely (auto-detects cache version)."""
 
+import glob
 import json
 import os
+import re
 import shutil
 import tempfile
 from datetime import datetime
 
 from . import config
+
+GRANOLA_DATA_DIR = os.path.expanduser("~/Library/Application Support/Granola")
 
 
 class CacheData:
@@ -19,10 +23,28 @@ class CacheData:
         self.meetings_meta: dict = state.get("meetingsMetadata", {})
 
 
+def _find_cache_file() -> str:
+    """Find the latest cache-v*.json in Granola's data directory."""
+    pattern = os.path.join(GRANOLA_DATA_DIR, "cache-v*.json")
+    matches = glob.glob(pattern)
+    if not matches:
+        raise FileNotFoundError(
+            f"No Granola cache file found in {GRANOLA_DATA_DIR}"
+        )
+    # Sort by version number descending, pick the highest
+    def version_key(p):
+        m = re.search(r"cache-v(\d+)\.json$", p)
+        return int(m.group(1)) if m else 0
+    matches.sort(key=version_key, reverse=True)
+    return matches[0]
+
+
 def load_cache(cache_path: str | None = None) -> CacheData:
     path = cache_path or config.get("granola_cache_path")
+
+    # If the configured path doesn't exist, auto-discover
     if not os.path.exists(path):
-        raise FileNotFoundError(f"Granola cache not found: {path}")
+        path = _find_cache_file()
 
     # Copy to temp to avoid reading a file Granola is actively writing
     with tempfile.NamedTemporaryFile(suffix=".json", delete=False) as tmp:
@@ -31,7 +53,11 @@ def load_cache(cache_path: str | None = None) -> CacheData:
         shutil.copy2(path, tmp_path)
         with open(tmp_path) as f:
             raw = json.load(f)
-        state = json.loads(raw["cache"])["state"]
+        cache = raw["cache"]
+        # v3: cache value is a JSON string; v4+: cache value is a dict
+        if isinstance(cache, str):
+            cache = json.loads(cache)
+        state = cache["state"]
         return CacheData(state)
     finally:
         if os.path.exists(tmp_path):
