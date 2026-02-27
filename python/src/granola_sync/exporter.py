@@ -8,7 +8,7 @@ from pathlib import Path
 
 from . import config
 from .auth import get_access_token
-from .api import fetch_transcript
+from .api import fetch_transcript, fetch_panels
 from .cache import load_cache
 from .docx_builder import create_meeting_docx
 from .markdown_builder import create_meeting_md
@@ -110,7 +110,7 @@ def run_export(cfg: dict | None = None, doc_ids: list[str] | None = None, force:
         base_name = f"{date_prefix} - {safe_filename(title)}"
         filename = unique_filename(drive_path, base_name, ext)
 
-        # Summary from panels
+        # Summary from panels — cache (v3) or API fallback (v4+)
         summary_html = ""
         doc_panels = cache.panels.get(doc_id, {})
         for panel_id, panel in doc_panels.items():
@@ -118,6 +118,14 @@ def run_export(cfg: dict | None = None, doc_ids: list[str] | None = None, force:
                 summary_html = panel.get("original_content", "")
                 if summary_html:
                     break
+        if not summary_html and token:
+            api_panels = fetch_panels(doc_id, token, cfg.get("api_url"))
+            if api_panels:
+                for panel in api_panels:
+                    if panel.get("title") == "Summary":
+                        summary_html = panel.get("original_content", "")
+                        if summary_html:
+                            break
 
         # Transcript: local cache first, API fallback second
         transcript_chunks = cache.transcripts.get(doc_id, [])

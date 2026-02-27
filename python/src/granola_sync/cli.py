@@ -83,11 +83,25 @@ def cmd_list(args):
 def cmd_show(args):
     from .cache import load_cache, get_meeting_detail
     from .manifest import load_manifest
+    from .auth import get_access_token
+    from .api import fetch_panels
 
     cfg = config.load_config()
     cache = load_cache(config.expand(cfg.get("granola_cache_path", "")))
     manifest = load_manifest(config.expand(cfg.get("manifest_path", "")))
     detail = get_meeting_detail(cache, args.doc_id, manifest)
+
+    # API fallback for summary if cache panels are empty (v4+)
+    if detail and not detail.get("summary_html"):
+        token = get_access_token(config.expand(cfg.get("granola_auth_path", "")))
+        if token:
+            api_panels = fetch_panels(args.doc_id, token, cfg.get("api_url"))
+            if api_panels:
+                for panel in api_panels:
+                    if panel.get("title") == "Summary":
+                        detail["summary_html"] = panel.get("original_content", "")
+                        if detail["summary_html"]:
+                            break
 
     if not detail:
         print(f"Meeting not found: {args.doc_id}", file=sys.stderr)

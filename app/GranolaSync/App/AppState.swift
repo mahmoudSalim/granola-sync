@@ -245,52 +245,114 @@ class AppState: ObservableObject {
         }
     }
 
+    @Published var updateReady = false
+
     func installUpdate() {
         guard !isUpdating else { return }
         isUpdating = true
         updateMessage = "Updating..."
+        let timestamp = DateFormatter.localizedString(from: Date(), dateStyle: .short, timeStyle: .medium)
+        let header = "\n--- Update started at \(timestamp) ---\n"
+        exportOutput = header
+        appendLog(header)
 
         Task {
             let success = await runBrewUpgrade()
             if success {
-                self.updateMessage = "Updated! Restart the app to use the new version."
+                self.updateMessage = "Updated! Click Relaunch to use the new version."
                 self.updateAvailable = nil
+                self.updateReady = true
             } else {
-                // Fallback: open GitHub release page
                 if let url = self.updateURL {
                     NSWorkspace.shared.open(url)
                 }
-                self.updateMessage = "Brew not available — opened download page."
+                self.updateMessage = "Brew failed — opened download page."
+                self.exportOutput += "Brew update failed. Opened GitHub release page.\n"
             }
             self.isUpdating = false
         }
     }
 
+    func relaunch() {
+        let app = "/Applications/Granola Sync.app"
+        let task = Process()
+        task.executableURL = URL(fileURLWithPath: "/bin/sh")
+        task.arguments = ["-c", "sleep 1 && open \"\(app)\""]
+        try? task.run()
+        NSApp.terminate(nil)
+    }
+
     private func runBrewUpgrade() async -> Bool {
         await withCheckedContinuation { continuation in
-            DispatchQueue.global(qos: .userInitiated).async {
-                // Find brew
+            DispatchQueue.global(qos: .userInitiated).async { [weak self] in
                 let brewPaths = ["/opt/homebrew/bin/brew", "/usr/local/bin/brew"]
                 guard let brewPath = brewPaths.first(where: { FileManager.default.isExecutableFile(atPath: $0) }) else {
+                    self?.appendLog("Homebrew not found\n")
                     continuation.resume(returning: false)
                     return
                 }
 
-                let process = Process()
-                process.executableURL = URL(fileURLWithPath: brewPath)
-                process.arguments = ["upgrade", "--cask", "granola-sync"]
-                let pipe = Pipe()
-                process.standardOutput = pipe
-                process.standardError = pipe
-
-                do {
-                    try process.run()
-                    process.waitUntilExit()
-                    continuation.resume(returning: process.terminationStatus == 0)
-                } catch {
-                    continuation.resume(returning: false)
+                func runBrew(_ args: [String]) -> (Bool, String) {
+                    let process = Process()
+                    process.executableURL = URL(fileURLWithPath: brewPath)
+                    process.arguments = args
+                    let pipe = Pipe()
+                    process.standardOutput = pipe
+                    process.standardError = pipe
+                    do {
+                        try process.run()
+                        process.waitUntilExit()
+                        let data = pipe.fileHandleForReading.readDataToEndOfFile()
+                        let output = String(data: data, encoding: .utf8) ?? ""
+                        return (process.terminationStatus == 0, output)
+                    } catch {
+                        return (false, error.localizedDescription)
+                    }
                 }
+
+                self?.appendLog("brew upgrade --cask granola-sync\n")
+                let (ok1, out1) = runBrew(["upgrade", "--cask", "granola-sync"])
+                self?.appendLog(out1)
+                if ok1 {
+                    continuation.resume(returning: true)
+                    return
+                }
+
+                self?.appendLog("brew tap mahmoudSalim/granola\n")
+                let (_, tapOut) = runBrew(["tap", "mahmoudSalim/granola"])
+                self?.appendLog(tapOut)
+
+                self?.appendLog("brew reinstall --cask granola-sync\n")
+                let (ok2, out2) = runBrew(["reinstall", "--cask", "granola-sync"])
+                self?.appendLog(out2)
+                if ok2 {
+                    continuation.resume(returning: true)
+                    return
+                }
+
+                self?.appendLog("brew uninstall + install --cask granola-sync\n")
+                let (_, out3) = runBrew(["uninstall", "--cask", "granola-sync", "--force"])
+                self?.appendLog(out3)
+                let (ok4, out4) = runBrew(["install", "--cask", "granola-sync"])
+                self?.appendLog(out4)
+                continuation.resume(returning: ok4)
             }
+        }
+    }
+
+    nonisolated private func appendLog(_ text: String) {
+        // Write to log file
+        let logPath = NSString(string: "~/Library/Application Support/GranolaSync/export.log").expandingTildeInPath
+        if let handle = FileHandle(forWritingAtPath: logPath) {
+            handle.seekToEndOfFile()
+            handle.write(Data(text.utf8))
+            handle.closeFile()
+        } else {
+            try? text.write(toFile: logPath, atomically: false, encoding: .utf8)
+        }
+
+        DispatchQueue.main.async {
+            self.exportOutput += text
         }
     }
 }

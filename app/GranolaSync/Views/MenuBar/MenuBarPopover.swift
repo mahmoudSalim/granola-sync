@@ -13,7 +13,7 @@ struct MenuBarPopover: View {
                 Text("Granola Sync")
                     .font(.headline)
                 Spacer()
-                Text("v1.1.3")
+                Text("v1.1.4")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
             }
@@ -52,8 +52,30 @@ struct MenuBarPopover: View {
                 .padding(.vertical, 6)
             }
 
+            // Relaunch banner
+            if appState.updateReady {
+                Button {
+                    appState.relaunch()
+                } label: {
+                    HStack {
+                        Image(systemName: "arrow.triangle.2.circlepath")
+                            .foregroundStyle(.white)
+                        Text("Update installed — tap to relaunch")
+                            .font(.caption.bold())
+                            .foregroundStyle(.white)
+                        Spacer()
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .background(.green.gradient, in: RoundedRectangle(cornerRadius: 8))
+                }
+                .buttonStyle(.plain)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 6)
+            }
+
             // Update message (after update completes or "up to date")
-            if !appState.updateMessage.isEmpty && appState.updateAvailable == nil {
+            if !appState.updateMessage.isEmpty && appState.updateAvailable == nil && !appState.updateReady {
                 Text(appState.updateMessage)
                     .font(.caption)
                     .foregroundStyle(.green)

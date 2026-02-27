@@ -1,6 +1,6 @@
 cask "granola-sync" do
-  version "1.1.3"
-  sha256 "ff07c62b65b188b9f8639b4864269d8132d43ee537371074192162cec1ed691d"
+  version "1.1.4"
+  sha256 "74ece2612f4736a6ca648311eddf58f08c0b641661a255b773effba0901a4b2c"
 
   url "https://github.com/mahmoudSalim/granola-sync/releases/download/v#{version}/GranolaSync-#{version}.dmg"
   name "Granola Sync"

@@ -38,7 +38,27 @@ struct DashboardView: View {
                     .disabled(appState.isUpdating)
                 }
 
-                if !appState.updateMessage.isEmpty && appState.updateAvailable == nil {
+                // Relaunch banner
+                if appState.updateReady {
+                    Button {
+                        appState.relaunch()
+                    } label: {
+                        HStack {
+                            Image(systemName: "arrow.triangle.2.circlepath")
+                                .foregroundStyle(.white)
+                            Text("Update installed — click to relaunch")
+                                .font(.callout.bold())
+                                .foregroundStyle(.white)
+                            Spacer()
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 12)
+                        .background(.green.gradient, in: RoundedRectangle(cornerRadius: 10))
+                    }
+                    .buttonStyle(.plain)
+                }
+
+                if !appState.updateMessage.isEmpty && appState.updateAvailable == nil && !appState.updateReady {
                     Text(appState.updateMessage)
                         .font(.callout)
                         .foregroundStyle(.green)
