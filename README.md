@@ -7,16 +7,17 @@
 Export your [Granola](https://granola.ai) meetings to Google Drive as `.docx`, `.md`, or `.txt` files.
 
 **Features:**
-- Reads meetings from Granola's local cache
-- Falls back to the Granola API for transcripts not in cache
+- Reads meetings from Granola's local cache (auto-detects cache version: v3, v4, etc.)
+- Falls back to the Granola API for transcripts and summaries not in local cache
 - Generates styled `.docx`, Markdown, or plain text exports with summary, notes, and full transcript
-- Meeting browser with search, sort, and bulk export
-- Dashboard with sync stats, charts, and activity heatmap
-- Tracks exports to avoid duplicates
+- Meeting browser with search, sort by date/title/duration, and bulk export
+- Dashboard with sync stats, charts, and 90-day activity heatmap
+- Tracks exports via manifest to avoid duplicates
 - macOS menu bar app with status display and one-click export
 - Full windowed app with dashboard, meeting browser, export history, log viewer, and settings
 - First-run setup wizard with Google Drive auto-detection
-- Scheduled automatic exports via launchd
+- Scheduled automatic exports via launchd (every 3 days, weekly, biweekly, or monthly)
+- In-app update checking with one-click brew upgrade and relaunch
 
 ## Install
 
@@ -61,25 +62,36 @@ On first launch, a setup wizard guides you through:
 ### CLI
 
 ```bash
-granola-sync export              # Export new meetings
-granola-sync export --json       # JSON output (for scripting)
+granola-sync export                        # Export new meetings
+granola-sync export --json                 # JSON output (for scripting)
 granola-sync export --ids ID1,ID2 --force  # Export specific meetings
-granola-sync list                # List all meetings in cache
-granola-sync list --json         # JSON list (for scripting)
-granola-sync show <doc_id>       # Show meeting details
+
+granola-sync list                          # List all meetings in cache
+granola-sync list --search "standup"       # Filter by title or attendee
+granola-sync list --sort title --limit 10  # Sort by date/title/duration
+granola-sync list --json                   # JSON list (for scripting)
+
+granola-sync show <doc_id>                 # Show meeting details
 granola-sync show <doc_id> --json
-granola-sync stats               # Show sync statistics
-granola-sync stats --json        # JSON stats
-granola-sync status              # Show sync status
-granola-sync status --json       # JSON status
-granola-sync config show         # Show current config
+
+granola-sync stats                         # Show sync statistics
+granola-sync stats --json
+
+granola-sync status                        # Show sync status
+granola-sync status --json
+
+granola-sync config show                   # Show current config
+granola-sync config get <key>              # Get a single config value
 granola-sync config set drive_path "~/path/to/drive"
-granola-sync config init         # Auto-detect and create config
-granola-sync config validate     # Check config validity
-granola-sync launchd install     # Install scheduled exports
-granola-sync launchd uninstall   # Remove scheduled exports
-granola-sync launchd status      # Check launchd status
-granola-sync version             # Show version
+granola-sync config init                   # Auto-detect and create config
+granola-sync config validate               # Check config validity
+
+granola-sync launchd install               # Install scheduled exports
+granola-sync launchd install --interval 86400  # Custom interval (seconds)
+granola-sync launchd uninstall             # Remove scheduled exports
+granola-sync launchd status                # Check launchd status
+
+granola-sync version                       # Show version
 ```
 
 ## Configuration
@@ -90,8 +102,10 @@ Config file: `~/Library/Application Support/GranolaSync/config.json`
 {
   "version": 1,
   "drive_path": "~/Library/CloudStorage/GoogleDrive-.../My Drive/Meetings",
-  "granola_cache_path": "~/Library/Application Support/Granola/cache-v3.json",
+  "granola_cache_path": "~/Library/Application Support/Granola/cache-v4.json",
   "granola_auth_path": "~/Library/Application Support/Granola/supabase.json",
+  "manifest_path": "~/Library/Application Support/GranolaSync/manifest.json",
+  "log_path": "~/Library/Application Support/GranolaSync/export.log",
   "schedule_interval": 1209600,
   "notifications_enabled": true,
   "export_format": "docx",
@@ -100,6 +114,8 @@ Config file: `~/Library/Application Support/GranolaSync/config.json`
 ```
 
 The Swift app and Python CLI share this same config file. Changes made in the GUI are immediately available to the CLI and vice versa.
+
+The cache path auto-detects the latest version if the configured file doesn't exist (e.g., after a Granola upgrade from v3 to v4).
 
 ## Architecture
 
