@@ -96,8 +96,8 @@ def run_export(cfg: dict | None = None, doc_ids: list[str] | None = None, force:
             result.skipped += 1
             continue
 
-        title = doc.get("title", "Untitled Meeting")
-        created_at = doc.get("created_at", "")
+        title = doc.get("title") or "Untitled Meeting"
+        created_at = doc.get("created_at") or ""
 
         try:
             dt = datetime.fromisoformat(created_at.replace("Z", "+00:00"))
