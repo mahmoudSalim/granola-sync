@@ -4,12 +4,12 @@
 
 # Granola Sync
 
-Export your [Granola](https://granola.ai) meetings to Google Drive as `.docx`, `.md`, or `.txt` files.
+Export your [Granola](https://granola.ai) meetings to any local or cloud-synced folder as `.docx`, `.md`, or `.txt` files.
 
 **Features:**
 - Reads meetings from Granola's local cache (auto-detects cache version: v3, v4, etc.)
 - Falls back to the Granola API for transcripts and summaries not in local cache
-- Generates styled `.docx`, Markdown, or plain text exports with summary, notes, and full transcript
+- Generates styled `.docx`, Markdown, or plain text exports to any local or cloud-synced folder (Google Drive, OneDrive, etc.) with summary, notes, and full transcript
 - Meeting browser with search, sort by date/title/duration, and bulk export
 - Dashboard with sync stats, charts, and 90-day activity heatmap
 - Tracks exports via manifest to avoid duplicates
@@ -56,7 +56,7 @@ Launch **GranolaSync.app** — a menu bar icon appears. Click it for quick statu
 
 On first launch, a setup wizard guides you through:
 1. Detecting your Granola installation
-2. Selecting your Google Drive export folder
+2. Selecting your export folder (Google Drive, OneDrive, or local)
 3. Choosing a sync schedule
 
 ### CLI
@@ -155,7 +155,7 @@ make dev-install
 - macOS 14.0+
 - Python 3.11+
 - [Granola](https://granola.ai) installed
-- [Google Drive for Desktop](https://www.google.com/drive/download/) running
+- A cloud storage or local folder for export (Google Drive, OneDrive, Dropbox, or any local path)
 
 ## License
 
