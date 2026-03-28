@@ -5,6 +5,8 @@ import re
 
 
 def safe_filename(name: str, max_len: int = 80) -> str:
+    if not name or not isinstance(name, str):
+        name = "Untitled"
     cleaned = re.sub(r'[<>:"/\\|?*]', "", name)
     cleaned = re.sub(r"\s+", " ", cleaned).strip()
     return cleaned[:max_len] if cleaned else "Untitled"

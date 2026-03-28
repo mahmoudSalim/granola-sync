@@ -137,7 +137,9 @@ def list_meetings(cache: CacheData, manifest: dict | None = None) -> list[dict]:
             "has_summary": has_summary,
             "has_notes": has_notes,
             "is_exported": is_exported,
-            "export_filename": export_info["filename"] if export_info else None,
+            "export_filename": (
+                export_info["filename"] if isinstance(export_info, dict) else export_info
+            ) if export_info else None,
         })
 
     # Sort by date descending (most recent first)
